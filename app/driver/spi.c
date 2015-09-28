@@ -28,12 +28,14 @@ void spi_lcd_mode_init(uint8 spi_no)
 
 	SET_PERI_REG_MASK(SPI_USER(spi_no), SPI_CS_SETUP|SPI_CS_HOLD|SPI_USR_COMMAND);
 	CLEAR_PERI_REG_MASK(SPI_USER(spi_no), SPI_FLASH_MODE);
-	// SPI clock=CPU clock/8
-	WRITE_PERI_REG(SPI_CLOCK(spi_no), 
-					((1&SPI_CLKDIV_PRE)<<SPI_CLKDIV_PRE_S)|
-					((3&SPI_CLKCNT_N)<<SPI_CLKCNT_N_S)|
-					((1&SPI_CLKCNT_H)<<SPI_CLKCNT_H_S)|
-					((3&SPI_CLKCNT_L)<<SPI_CLKCNT_L_S)); //clear bit 31,set SPI clock div
+
+        // SPI clock = CPU clock / 10 / 4 = 2 MHz
+        // NOTE: the predivider of 9 is N+1, so 9+1 = 10
+        // NOTE: the clock count of is N+1, so 3+1 = 4
+        // This makes for a total of 80 / 10 / 4 = 2 MHz SPI clock
+        WRITE_PERI_REG(SPI_CLOCK(spi_no), 
+                ((9 & SPI_CLKDIV_PRE) << SPI_CLKDIV_PRE_S) | ((3 & SPI_CLKCNT_N) << SPI_CLKCNT_N_S) |
+                ((9 & SPI_CLKCNT_H) << SPI_CLKCNT_H_S) | ((3 & SPI_CLKCNT_L) << SPI_CLKCNT_L_S)); // clear bit 31, set SPI clock div
 	
 }
 /******************************************************************************
